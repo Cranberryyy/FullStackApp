@@ -73,9 +73,14 @@ def delete_article(id):
 
 @app.route('/search', methods=['GET'])
 def search_articles():
-    query = request.args.get('query', '')
+    title_query = request.args.get('title', '')
+    description_query = request.args.get('description', '')
     articles = read_articles()
-    filtered_articles = [article for article in articles if query.lower() in article['title'].lower()]
+    filtered_articles = [
+        article for article in articles 
+        if title_query.lower() in article['title'].lower() or 
+           description_query.lower() in article['body'].lower()
+    ]
     return jsonify(filtered_articles)
 
 if __name__ == "__main__":
