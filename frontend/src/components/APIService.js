@@ -45,6 +45,16 @@ export default class APIService {
         })
         .then(resp => resp.json())
     }
+
+    static SearchArticle(titleQuery, descriptionQuery) {
+        return fetch(`http://127.0.0.1:5000/search?title=${titleQuery}&description=${descriptionQuery}`, {
+            'method': 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(resp => resp.json())
+    }
 }
 
 

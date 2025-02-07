@@ -1,15 +1,17 @@
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { useState, useEffect } from 'react';
 import ArticleList from './components/ArticleList';
-import Form from './components/Form';
-import APIService from './components/APIService';
+import InsertForm from './components/InsertForm';
+import SearchAndEditForm from './components/SearchAndEditForm';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
   const [articles, setArticles] = useState([]);
   const [editedArticle, setEditedArticle] = useState(null);
-  const [formType, setFormType] = useState(null); // Track which form is open
-  const [searchQuery, setSearchQuery] = useState('');
+  const [formType, setFormType] = useState(null); 
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const navigate = useNavigate(); // Used for navigation
 
   useEffect(() => {
     fetch('http://192.168.0.240:8333/get', {
@@ -21,105 +23,73 @@ function App() {
       .catch(error => console.log(error));
   }, []);
 
-  // Open the insert article form
-  const openInsertForm = () => {
-    setEditedArticle({ title: '', body: '' });
-    setFormType('insert');
-    setFormSubmitted(false);
+  // Handle article double-click for navigation to details page
+  const handleArticleDoubleClick = (article) => {
+    navigate('/details', { state: { article } });
   };
 
-  // Open the edit article form
-  const openEditForm = () => {
-    setEditedArticle({title: 'Hello', body: 'World'});
-    setFormType('edit');
-    setFormSubmitted(false);
-  };
-
-  // Open the search box
-  const openSearchForm = () => {
-    setFormType('search');
-    setFormSubmitted(false);
-  };
-
-  // Insert a new article
-  const insertedArticle = (article) => {
-    const newArticles = [...articles, article];
-    setArticles(newArticles);
-    setFormSubmitted(true); // Mark form as submitted
-  };
-
-  // Update an existing article
-  const updatedData = (article) => {
-    const newArticles = articles.map(myArticle =>
-      myArticle.id === article.id ? article : myArticle
-    );
-    setArticles(newArticles);
-    setFormSubmitted(true); // Mark form as submitted
-  };
-
-  // Delete an article
-  const deleteArticle = (article) => {
-    const newArticles = articles.filter(myArticle => myArticle.id !== article.id);
-    setArticles(newArticles);
-  };
-
-  // Search articles
-  const searchArticles = () => {
-    APIService.SearchArticle(searchQuery)
+  const handleFormSubmit = () => {
+    setFormSubmitted(true);
+    setFormType(null);
+    fetch('http://192.168.0.240:8333/get', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(resp => resp.json())
       .then(resp => setArticles(resp))
       .catch(error => console.log(error));
   };
 
   return (
     <div className="App">
-      <h1>Hello again React</h1>
+      <h1>Article Management</h1>
       {!formSubmitted && (
         <div className="row">
           <div className="col">
-            <button className="btn btn-success" onClick={openInsertForm}>
+            <button className="btn btn-success" onClick={() => setFormType('insert')}>
               Insert Article
             </button>
-          </div>
-          <div className="col">
-            <button className="btn btn-primary" onClick={() => openEditForm(articles[0])}>
-              Edit Article
-            </button>
-          </div>
-          <div className="col">
-            <button className="btn btn-warning" onClick={openSearchForm}>
-              Search Article
+            <button className="btn btn-primary" onClick={() => setFormType('searchAndEdit')}>
+              Search and Edit Article
             </button>
           </div>
         </div>
       )}
 
-      {/* Insert/Edit Form (Conditional Rendering) */}
-      {formType === 'insert' || formType === 'edit' ? (
-        <Form 
-          article={editedArticle} 
-          updatedData={updatedData} 
-          insertedArticle={insertedArticle} 
-          formType={formType} // Pass formType as a prop
+      {formType === 'insert' && (
+        <InsertForm onFormSubmit={handleFormSubmit} />
+      )}
+
+      {formType === 'searchAndEdit' && (
+        <SearchAndEditForm onFormSubmit={handleFormSubmit} />
+      )}
+
+      {formSubmitted && formType === 'searchAndEdit' ? (
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {articles.map(article => (
+              <tr key={article.id} onDoubleClick={() => handleArticleDoubleClick(article)}>
+                <td>{article.title}</td>
+                <td>{article.body}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : null}
+
+      {formType !== 'searchAndEdit' ? (
+        <ArticleList 
+          articles={articles} 
+          editArticle={(article) => setEditedArticle(article)} 
+          deleteArticle={(article) => setArticles(articles.filter(a => a.id !== article.id))} 
         />
       ) : null}
-
-      {/* Search Form */}
-      {formType === 'search' ? (
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Search article by title..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button className="btn btn-primary" onClick={searchArticles}>
-            Search
-          </button>
-        </div>
-      ) : null}
-
-      {/* Display the Article List */}
-      <ArticleList articles={articles} editArticle={openEditForm} deleteArticle={deleteArticle} />
     </div>
   );
 }

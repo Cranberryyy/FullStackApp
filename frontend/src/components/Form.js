@@ -35,7 +35,7 @@ function Form(props) {
         <div>
             {props.article ? (
                 <div className="mb-3">
-                    <label htmlFor="Information" className="form-label">Information</label>
+                    {/* <label htmlFor="Information" className="form-label">Information</label> */}
                     <input
                         type="text"
                         className="form-control"
@@ -59,7 +59,8 @@ function Form(props) {
                         className="btn btn-success mt-3"
                         disabled={submitted}  // ✅ Disables button after submission
                     >
-                        {props.formType === 'edit' ? 'OK' : 'Insert'}
+                        Insert
+                        {/* {props.formType === 'edit' ? 'OK' : 'Insert'} */}
                     </button>
                 </div>
             ) : null}
