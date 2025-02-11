@@ -4,7 +4,6 @@ export default class APIService {
             'method':'PUT',
             headers: {
               'Content-Type':'application/json'
-      
             },
             body: JSON.stringify(body)
           })
@@ -16,24 +15,19 @@ export default class APIService {
             'method':'POST',
             headers: {
               'Content-Type':'application/json'
-      
             },
             body: JSON.stringify(body)
           })
           .then(resp => resp.json())
     }
 
-
     static DeleteArticle(id) {
         return fetch(`http://127.0.0.1:5000/delete/${id}/`, {
-            'method':'Delete',
+            'method':'DELETE',
             headers: {
               'Content-Type':'application/json'
-      
-            },
-            
-          })
-          
+            }
+        })
     }
 
     static SearchArticle(query) {
@@ -55,6 +49,32 @@ export default class APIService {
         })
         .then(resp => resp.json())
     }
+
+    static async ChatInteract(body) {
+        try {
+          const response = await fetch("http://127.0.0.1:5000/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+          });
+      
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+      
+          const data = await response.json().catch(() => {
+            throw new Error("Invalid JSON format from server");
+          });
+      
+          console.log("Server Response:", data);
+          return data;
+        } catch (error) {
+          console.error("Fetch error:", error);
+          throw error;
+        }
+      }
+      
 }
-
-
+      

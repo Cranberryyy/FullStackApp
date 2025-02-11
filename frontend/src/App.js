@@ -5,6 +5,7 @@ import ArticleList from './components/ArticleList';
 import InsertForm from './components/InsertForm';
 import SearchAndEditForm from './components/SearchAndEditForm';
 import { useNavigate } from 'react-router-dom';
+import ChatBot from './components/ChatBot'; // Import Chatbot component
 
 function App() {
   const [articles, setArticles] = useState([]);
@@ -30,7 +31,6 @@ function App() {
 
   const handleFormSubmit = () => {
     setFormSubmitted(true);
-    setFormType(null);
     fetch('http://192.168.0.240:8333/get', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
@@ -90,6 +90,7 @@ function App() {
           deleteArticle={(article) => setArticles(articles.filter(a => a.id !== article.id))} 
         />
       ) : null}
+      <ChatBot /> {/* Add Chatbot component */}
     </div>
   );
 }
