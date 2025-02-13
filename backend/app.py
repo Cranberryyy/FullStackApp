@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import csv
 import os
-from chat import get_chatbot_response
+from chat import get_chatbot_response, get_qa_response, get_langchain_response
 
 app = Flask(__name__)
 CORS(app)
@@ -91,8 +91,19 @@ def chat():
     if not message.strip():
         return jsonify({'error': 'Message cannot be empty'}), 400
 
-    reply = get_chatbot_response(message)
+    reply = get_langchain_response(message)
     return jsonify({'reply': reply})
+
+@app.route('/qa', methods=['POST'])
+def qa():
+    data = request.json
+    question = data.get('question', '')
+    context = data.get('context', '')
+    if not question.strip() or not context.strip():
+        return jsonify({'error': 'Question and context cannot be empty'}), 400
+
+    answer = get_qa_response(question, context)
+    return jsonify({'answer': answer})
 
 if __name__ == "__main__":
     app.run(debug=True)
